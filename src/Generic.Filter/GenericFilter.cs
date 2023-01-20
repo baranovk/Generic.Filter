@@ -26,38 +26,6 @@ namespace Generic.Filter
             return filter.ToExpression();
         }
 
-        private static IEnumerable<Expression<Func<TFilter, Expression<Func<TItem, bool>>>>> GetFilteringExpressionsByProperty1()
-        {
-            var filterType = typeof(TFilter);
-            var itemParameterExpr = Expression.Parameter(typeof(TItem), "item");
-            var filterParameterExpr = Expression.Parameter(filterType, "filter");
-
-            return filterType
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(p => typeof(IFilterCriteria).IsAssignableFrom(p.PropertyType))
-                .Aggregate(new List<Expression<Func<TFilter, Expression<Func<TItem, bool>>>>>(),
-                    (expressions, filterPropertyInfo) => {
-                        // if (dictionary[filterPropertyInfgo.Name] != null)
-                        //var itemPropertyExpr = _propertyMap.ContainsKey(filterPropertyInfo.Name)
-                        //    ? Expression.Property(itemParameterExpr, filterPropertyInfo.Name)
-                        //    : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
-
-                        var itemPropertyExpr = Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
-                        var filterPropertyExpr = Expression.Property(filterParameterExpr, filterPropertyInfo);
-
-                        var filteringExpressionGenerator = FilteringExpressionGeneratorFactory.GetFilteringExpressionGenerator(filterPropertyInfo.PropertyType);
-                        var filteringExpression = filteringExpressionGenerator.BuildFilteringExpression(itemPropertyExpr, filterPropertyExpr);
-
-                        var lambda = Expression.Lambda<Func<TFilter, Expression<Func<TItem, bool>>>>(
-                            Expression.Lambda<Func<TItem, bool>>(filteringExpression, itemParameterExpr),
-                            filterParameterExpr
-                        );
-
-                        expressions.Add(lambda);
-                        return expressions;
-                    });
-        }
-
         private static Expression<Func<TItem, bool>> BuildFilteringExprression(GenericFilter<TItem, TFilter> filter)
         {
             var filteringPredicateExpressions = GetFilteringExpressionsByProperty(filter);
