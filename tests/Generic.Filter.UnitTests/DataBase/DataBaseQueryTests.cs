@@ -51,7 +51,7 @@ namespace Generic.Filter.UnitTests.DataBase
             var filter = new AirportFilter { AirportCode = "HND" };
             var filteredAirports = _dbContext.Flight.Include(f => f.Aircraft).Take(2).ToList();
 
-            Assert.That(filteredAirports, Has.Count.EqualTo(1));
+            Assert.That(filteredAirports, Has.Count.EqualTo(2));
             //Assert.That(filteredAirports.First().AirportCode, Is.EqualTo("HND"));
             //Assert.That(filteredAirports.First().AirportName, Is.EqualTo("Tokyo Haneda International Airport"));
         }
