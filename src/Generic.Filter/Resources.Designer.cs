@@ -70,11 +70,29 @@ namespace Generic.Filter {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression &apos;{0}&apos; must resolve to top-level member and not any child object&apos;s properties. You can use ForPath instead..
+        /// </summary>
+        internal static string ErrorInvalidPropertyExpression {
+            get {
+                return ResourceManager.GetString("ErrorInvalidPropertyExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo.
         /// </summary>
         internal static string ErrorUnsupportedMemberInfoType {
             get {
                 return ResourceManager.GetString("ErrorUnsupportedMemberInfoType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not use {0} expression for property mapping. Invalid expression type..
+        /// </summary>
+        internal static string ErrorUnsupportedMemberTypeForMapping {
+            get {
+                return ResourceManager.GetString("ErrorUnsupportedMemberTypeForMapping", resourceCulture);
             }
         }
     }

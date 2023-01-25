@@ -120,7 +120,13 @@
   <data name="ErrorFilterDoesNotContainAnyCriteria" xml:space="preserve">
     <value>Error filter type {0} doesn't contain any criteria</value>
   </data>
+  <data name="ErrorInvalidPropertyExpression" xml:space="preserve">
+    <value>Expression '{0}' must resolve to top-level member and not any child object's properties. You can use ForPath instead.</value>
+  </data>
   <data name="ErrorUnsupportedMemberInfoType" xml:space="preserve">
     <value>Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo</value>
+  </data>
+  <data name="ErrorUnsupportedMemberTypeForMapping" xml:space="preserve">
+    <value>Can not use {0} expression for property mapping. Invalid expression type.</value>
   </data>
 </root>

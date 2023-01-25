@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace Generic.Filter.Extensions
 {
@@ -17,5 +12,7 @@ namespace Generic.Filter.Extensions
             MemberTypes.Property => ((PropertyInfo)member).PropertyType,
             _ => throw new ArgumentException(Resources.ErrorUnsupportedMemberInfoType)
         };
+
+        public static bool IsProperty(this MemberInfo member) => member.MemberType.Equals(MemberTypes.Property);
     }
 }

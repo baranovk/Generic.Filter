@@ -7,16 +7,21 @@ namespace Generic.Filter
 {
     public abstract class GenericFilter<TItem, TFilter> where TFilter : GenericFilter<TItem, TFilter>
     {
-        //private Dictionary<string, PropertyInfo> _propertyMap = new();
+        private Dictionary<string, PropertyInfo> _propertyMap = new();
 
-        //private static Lazy<IEnumerable<Func<TFilter, Expression<Func<TItem, bool>>>>> _filteringExpressions 
-        //    = new(() => GetFilteringExpressionsByProperty().Select(_ => _.Compile()));
+        private FilterMapping<TItem, TFilter>? _mappings;
+
         protected readonly Lazy<Expression<Func<TItem, bool>>> _filteringExpression;
 
         public GenericFilter()
         {
             var filter = this;
             _filteringExpression = new Lazy<Expression<Func<TItem, bool>>>(() => BuildFilteringExprression(filter));
+        }
+
+        public GenericFilter(FilterMapping<TItem, TFilter> mappings) : this()
+        {
+            _mappings = mappings;
         }
 
         protected virtual Expression<Func<TItem, bool>> ToExpression() => _filteringExpression.Value;
@@ -26,7 +31,7 @@ namespace Generic.Filter
             return filter.ToExpression();
         }
 
-        private static Expression<Func<TItem, bool>> BuildFilteringExprression(GenericFilter<TItem, TFilter> filter)
+        private Expression<Func<TItem, bool>> BuildFilteringExprression(GenericFilter<TItem, TFilter> filter)
         {
             var filteringPredicateExpressions = GetFilteringExpressionsByProperty(filter);
 
@@ -38,7 +43,7 @@ namespace Generic.Filter
                 .Aggregate(filteringPredicateExpressions.ElementAt(0), (expr, acc) => acc.And(expr));
         }
 
-        private static IEnumerable<Expression<Func<TItem, bool>>> GetFilteringExpressionsByProperty(GenericFilter<TItem, TFilter> filter)
+        private IEnumerable<Expression<Func<TItem, bool>>> GetFilteringExpressionsByProperty(GenericFilter<TItem, TFilter> filter)
         {
             var filterType = typeof(TFilter);
             var itemParameterExpr = Expression.Parameter(typeof(TItem), "item");
@@ -48,12 +53,10 @@ namespace Generic.Filter
                 .Where(p => typeof(IFilterCriteria).IsAssignableFrom(p.PropertyType))
                 .Aggregate(new List<Expression<Func<TItem, bool>>>(),
                     (expressions, filterPropertyInfo) => {
-                        // if (dictionary[filterPropertyInfgo.Name] != null)
-                        //var itemPropertyExpr = _propertyMap.ContainsKey(filterPropertyInfo.Name)
-                        //    ? Expression.Property(itemParameterExpr, filterPropertyInfo.Name)
-                        //    : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
+                        var itemPropertyExpr = _propertyMap.ContainsKey(filterPropertyInfo.Name)
+                            ? Expression.Property(itemParameterExpr, _propertyMap[filterPropertyInfo.Name])
+                            : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
 
-                        var itemPropertyExpr = Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
                         var filterPropertyExpr = Expression.Property(Expression.Constant(filter), filterPropertyInfo);
 
                         var filteringExpressionGenerator = FilteringExpressionGeneratorFactory.GetFilteringExpressionGenerator(filterPropertyInfo.PropertyType);
