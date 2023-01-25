@@ -7,9 +7,9 @@ namespace Generic.Filter.UnitTests
         [Test]
         public void CorrectFilter_ShouldBeCreatedFromConfiguration()
         {
-            var mapExpr = new FilterMapping<Parent, ParentFilter>();
+            var mapping = new FilterMapping<Parent, ParentFilter>();
 
-            mapExpr
+            mapping
                 .ForMember(p => p.FirstName, f => f.ParentFirstName)
                 .ForMember(p => p.LastName, f => f.ParentLastName)
                 .ForMember(p => p.Age, f => f.ParentAge);
