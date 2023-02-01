@@ -1,48 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace Generic.Filter.Criteria
 {
-    public readonly struct EqualCriterion : IFilterCriteria, IConvertible
+    public class EqualCriterion : Criterion, IConvertible
     {
-        #region Fields
-
-        private readonly object? _value;
-
-        #endregion
-
         #region Constructors
 
-        public EqualCriterion(object value)
+        public EqualCriterion(object value) : base(value)
         {
             // TODO: add a descriptive exception message
             if (value is EqualCriterion)
                 throw new ArgumentException(nameof(value));
-
-            _value = value;
         }
 
-        #endregion
-
-        #region Properties
-
-        public bool IsNull => _value == null;
-
-        #endregion
-
-        #region Public Methods
-
-        public override string? ToString()
-        {
-            return _value?.ToString();
-        }
-
-        #endregion
+        #endregion        
 
         #region Interfaces
 

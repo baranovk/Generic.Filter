@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Generic.Filter": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "COMPlus_ReadyToRun": "0"
+      }
+    }
+  }
+}

@@ -1,35 +1,99 @@
 ﻿using Generic.Filter.Criteria;
+using System.Linq.Expressions;
 
 namespace Generic.Filter.UnitTests
 {
     public class FilterConfigurationTests
     {
-        [Test]
-        public void CorrectFilter_ShouldBeCreatedFromConfiguration()
+        private List<Parent> _parents;
+
+        [SetUp]
+        public void SetUp()
         {
-            var mapping = new FilterMapping<Parent, ParentFilter>();
-
-            mapping
-                .ForMember(p => p.FirstName, f => f.ParentFirstName)
-                .ForMember(p => p.LastName, f => f.ParentLastName)
-                .ForMember(p => p.Age, f => f.ParentAge);
-
-            var filterConfig = new ParentFilterConfiguration();
-
-            var parents = new List<Parent> 
-            { 
+            _parents = new List<Parent>
+            {
                 new Parent { FirstName = "John", LastName = "Smith", Age = 40, Child = new Person { FirstName = "Tom", LastName = "Smith", Age = 15 } },
                 new Parent { FirstName = "Peter", LastName = "Parker", Age = 35, Child = new Person { FirstName = "Tina", LastName = "Parker", Age = 5 } }
             };
+        }
 
-            var filter = filterConfig.CreateFilter();
+        [Test]
+        public void FilterWithPropertyMappings_ShouldFilterItemsCorrectly()
+        {
+            var filter = new ParentFilter(
+                new FilterMapping<Parent, ParentFilter>()
+                    .ForMember(p => p.FirstName, f => f.ParentFirstName)
+                    .ForMember(p => p.LastName, f => f.ParentLastName)
+                    .ForMember(p => p.Age, f => f.ParentAge)
+            );
+
             filter.ParentLastName = "Smith";
             filter.ParentAge = 40;
-            filter.ChildFirstName = "Tom";
+
+            var filteredParents = _parents.AsQueryable().Where(filter).ToList();
+            Assert.That(filteredParents, Has.Count.EqualTo(1));
+
+            Expression<Func<ParentFilter, Func<Parent, bool>>> ex = filter => new Func<Parent, bool>(m => m.Child.FirstName == filter.ChildFirstName);
+        }
+
+        [Test]
+        public void FilterWithPropertyMappings_ShouldFilterItemsCorrectlyBySecondLevelProperties()
+        {
+            /*
+             * p => p.Child.LastName
+
+                Lambda
+	                |-- Body[MemberExpression]: NodeType = MemberAccess, Member[MemberInfo] = LastName
+			                |-- Expression[MemberExpression]: NodeType = MemberAccess, Member[MemberInfo] = Child
+				                |-- Expression[TypedParameterExpression]: NodeType = Parameter, Member[MemberInfo] = Child
+             */
+            var filter = new ParentFilter(
+                new FilterMapping<Parent, ParentFilter>()
+                    .ForMember(p => p.Child.LastName, f => f.ChildLastName)
+            );
+
+            filter.ChildLastName = "Turner";
+
+            var parents = new List<Parent>
+            {
+                new Parent { FirstName = "John", LastName = "Smith", Age = 40, Child = null },
+                new Parent { FirstName = "Peter", LastName = "Parker", Age = 35, Child = new Person { FirstName = "Tina", LastName = "Turner", Age = 5 } }
+            };
 
             var filteredParents = parents.AsQueryable().Where(filter).ToList();
-
             Assert.That(filteredParents, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void FilterWithPropertyMappings_ShouldFilterItemsCorrectlyBySecondLevelProperties_IfSecondLevelPropertyIsNull()
+        {
+            var filter = new ParentFilter(
+                new FilterMapping<Parent, ParentFilter>()
+                    .ForMember(p => p.Child.LastName, f => f.ChildLastName)
+            );
+
+            filter.ChildLastName = "Parker";
+
+            var filteredParents = _parents.AsQueryable().Where(filter).ToList();
+            Assert.That(filteredParents, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void NotMatchingFilterWithPropertyMappings_ShouldNotMatchAnyItem()
+        {
+            var filter = new ParentFilter(
+                new FilterMapping<Parent, ParentFilter>()
+                    .ForMember(p => p.FirstName, f => f.ParentFirstName)
+                    .ForMember(p => p.LastName, f => f.ParentLastName)
+                    .ForMember(p => p.Age, f => f.ParentAge)
+            )
+            {
+                ParentLastName = "Smith",
+                ParentAge = 32
+            };
+
+            var filteredParents = _parents.AsQueryable().Where(filter).ToList();
+            Assert.That(filteredParents, Has.Count.EqualTo(0));
         }
 
         public class Person
@@ -48,6 +112,10 @@ namespace Generic.Filter.UnitTests
 
         public class ParentFilter : GenericFilter<Parent, ParentFilter>
         {
+            public ParentFilter(FilterMapping<Parent, ParentFilter> propertyMappings) : base(propertyMappings)
+            {
+            }
+
             public EqualCriterion ParentFirstName { get; set; }
 
             public EqualCriterion ParentLastName { get; set; }
@@ -59,14 +127,6 @@ namespace Generic.Filter.UnitTests
             public EqualCriterion ChildLastName { get; set; }
 
             public EqualCriterion ChildAge { get; set; }
-        }
-
-        public class ParentFilterConfiguration : IFilterConfiguration<Parent, ParentFilter>
-        {
-            public ParentFilter CreateFilter()
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

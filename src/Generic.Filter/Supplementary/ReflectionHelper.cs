@@ -8,11 +8,14 @@ namespace Generic.Filter.Supplementary
         public static MemberInfo FindProperty(LambdaExpression lambdaExpression)
         {
             Expression expressionToCheck = lambdaExpression.Body;
+
             while (true)
             {
                 switch (expressionToCheck)
                 {
-                    case MemberExpression { Member: var member, Expression: { NodeType: ExpressionType.Parameter or ExpressionType.Convert } }:
+                    //case PropertyExpression { Member: var member, Expression: { NodeType: ExpressionType.Parameter or ExpressionType.Convert } }:
+                    //    return member;
+                    case MemberExpression { Member: var member, Expression: { NodeType: ExpressionType.Parameter or ExpressionType.Convert or ExpressionType.MemberAccess } }:
                         return member;
                     case UnaryExpression { Operand: var operand }:
                         expressionToCheck = operand;
@@ -24,4 +27,5 @@ namespace Generic.Filter.Supplementary
                 }
             }
         }
+    }
 }

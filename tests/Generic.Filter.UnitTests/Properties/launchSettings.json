@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Generic.Filter.UnitTests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "COMPlus_ReadyToRun": "0"
+      }
+    }
+  }
+}

@@ -22,7 +22,6 @@ namespace Generic.Filter.UnitTests
             };
 
             Expression<Func<ModelFilter, Func<Model, bool>>> ex = filter => new Func<Model, bool>(m => filter.FirstName.IsNull || m.FirstName == filter.FirstName);
-                
 
             var filter = new ModelFilter { FirstName = "John", LastName = "Smith" };
             var filteredModels = models.AsQueryable().Where(filter).ToList();
@@ -63,7 +62,27 @@ namespace Generic.Filter.UnitTests
             var filter = new ModelFilter { LastName = "Smith" };
             var filteredModels = models.AsQueryable().Where(filter).ToList();
 
-            Assert.That(filter.FirstName.IsNull, Is.True);
+            Assert.That(filteredModels, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void Models_ShoulMatchNonMatchingFilterWhenFilterProperyValuesAreChanged()
+        {
+            var models = new List<Model>
+            {
+                new Model { FirstName = "Tom", LastName = "Perry" },
+                new Model { FirstName = "John", LastName = "Smith" },
+                new Model { FirstName = "Jane", LastName = "Smith" }
+            };
+
+            var filter = new ModelFilter { LastName = "Tompson" };
+            var filteredModels = models.AsQueryable().Where(filter).ToList();
+
+            Assert.That(filteredModels, Has.Count.EqualTo(0));
+
+            filter = new ModelFilter { LastName = "Smith" };
+            filteredModels = models.AsQueryable().Where(filter).ToList();
+
             Assert.That(filteredModels, Has.Count.EqualTo(2));
         }
 

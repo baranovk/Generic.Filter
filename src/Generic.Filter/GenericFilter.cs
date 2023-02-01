@@ -1,35 +1,39 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using Generic.Filter.Criteria;
+﻿using Generic.Filter.Criteria;
 using Generic.Filter.Expressions;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Generic.Filter
 {
     public abstract class GenericFilter<TItem, TFilter> where TFilter : GenericFilter<TItem, TFilter>
     {
-        private Dictionary<string, PropertyInfo> _propertyMap = new();
+        #region Fields
 
-        private FilterMapping<TItem, TFilter>? _mappings;
+        private bool _isDirty;
+        private readonly FilterMapping<TItem, TFilter>? _propertyMappings;
 
-        protected readonly Lazy<Expression<Func<TItem, bool>>> _filteringExpression;
+        #endregion
+
+        #region Constructors
 
         public GenericFilter()
         {
-            var filter = this;
-            _filteringExpression = new Lazy<Expression<Func<TItem, bool>>>(() => BuildFilteringExprression(filter));
         }
 
-        public GenericFilter(FilterMapping<TItem, TFilter> mappings) : this()
+        public GenericFilter(FilterMapping<TItem, TFilter> propertyMappings) : this()
         {
-            _mappings = mappings;
+            _propertyMappings = propertyMappings;
         }
 
-        protected virtual Expression<Func<TItem, bool>> ToExpression() => _filteringExpression.Value;
+        #endregion
 
-        public static implicit operator Expression<Func<TItem, bool>>(GenericFilter<TItem, TFilter> filter)
-        {
-            return filter.ToExpression();
-        }
+        #region Properties
+
+        protected virtual Expression<Func<TItem, bool>> ToExpression() => BuildFilteringExprression(this);
+
+        #endregion
+
+        #region Private Methods
 
         private Expression<Func<TItem, bool>> BuildFilteringExprression(GenericFilter<TItem, TFilter> filter)
         {
@@ -52,9 +56,12 @@ namespace Generic.Filter
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(p => typeof(IFilterCriteria).IsAssignableFrom(p.PropertyType))
                 .Aggregate(new List<Expression<Func<TItem, bool>>>(),
-                    (expressions, filterPropertyInfo) => {
-                        var itemPropertyExpr = _propertyMap.ContainsKey(filterPropertyInfo.Name)
-                            ? Expression.Property(itemParameterExpr, _propertyMap[filterPropertyInfo.Name])
+                    (expressions, filterPropertyInfo) =>
+                    {
+                        if (filterPropertyInfo.GetValue(filter) is null) return expressions;
+
+                        var itemPropertyExpr = null != _propertyMappings?[filterPropertyInfo.Name]
+                            ? Expression.Property(itemParameterExpr, _propertyMappings[filterPropertyInfo.Name]!)
                             : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
 
                         var filterPropertyExpr = Expression.Property(Expression.Constant(filter), filterPropertyInfo);
@@ -67,5 +74,16 @@ namespace Generic.Filter
                         return expressions;
                     });
         }
+
+        #endregion
+
+        #region Operators
+
+        public static implicit operator Expression<Func<TItem, bool>>(GenericFilter<TItem, TFilter> filter)
+        {
+            return filter.ToExpression();
+        }
+
+        #endregion
     }
 }
