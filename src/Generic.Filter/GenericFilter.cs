@@ -9,8 +9,7 @@ namespace Generic.Filter
     {
         #region Fields
 
-        private bool _isDirty;
-        private readonly FilterMapping<TItem, TFilter>? _propertyMappings;
+        private readonly FilterMappings<TItem, TFilter>? _propertyMappings;
 
         #endregion
 
@@ -20,7 +19,7 @@ namespace Generic.Filter
         {
         }
 
-        public GenericFilter(FilterMapping<TItem, TFilter> propertyMappings) : this()
+        public GenericFilter(FilterMappings<TItem, TFilter> propertyMappings) : this()
         {
             _propertyMappings = propertyMappings;
         }
@@ -61,7 +60,7 @@ namespace Generic.Filter
                         if (filterPropertyInfo.GetValue(filter) is null) return expressions;
 
                         var itemPropertyExpr = null != _propertyMappings?[filterPropertyInfo.Name]
-                            ? Expression.Property(itemParameterExpr, _propertyMappings[filterPropertyInfo.Name]!)
+                            ? _propertyMappings[filterPropertyInfo.Name]!.MapFor(itemParameterExpr)
                             : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
 
                         var filterPropertyExpr = Expression.Property(Expression.Constant(filter), filterPropertyInfo);

@@ -13,9 +13,7 @@ namespace Generic.Filter.Supplementary
             {
                 switch (expressionToCheck)
                 {
-                    //case PropertyExpression { Member: var member, Expression: { NodeType: ExpressionType.Parameter or ExpressionType.Convert } }:
-                    //    return member;
-                    case MemberExpression { Member: var member, Expression: { NodeType: ExpressionType.Parameter or ExpressionType.Convert or ExpressionType.MemberAccess } }:
+                    case MemberExpression { Member: var member, Expression.NodeType: ExpressionType.Parameter or ExpressionType.Convert }:
                         return member;
                     case UnaryExpression { Operand: var operand }:
                         expressionToCheck = operand;
@@ -23,7 +21,7 @@ namespace Generic.Filter.Supplementary
                     default:
                         throw new ArgumentException(
                             string.Format(Resources.ErrorInvalidPropertyExpression, lambdaExpression),
-                            nameof(lambdaExpression));
+                                nameof(lambdaExpression));
                 }
             }
         }

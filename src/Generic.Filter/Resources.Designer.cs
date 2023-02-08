@@ -70,11 +70,29 @@ namespace Generic.Filter {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid member type. Member {0} should have type {1} but has {2}.
+        /// </summary>
+        internal static string ErrorInvalidMemberType {
+            get {
+                return ResourceManager.GetString("ErrorInvalidMemberType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Expression &apos;{0}&apos; must resolve to top-level member and not any child object&apos;s properties. You can use ForPath instead..
         /// </summary>
         internal static string ErrorInvalidPropertyExpression {
             get {
                 return ResourceManager.GetString("ErrorInvalidPropertyExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expression &apos;{0}&apos; must resolve to object&apos;s member path chain..
+        /// </summary>
+        internal static string ErrorInvalidPropertyPathExpression {
+            get {
+                return ResourceManager.GetString("ErrorInvalidPropertyPathExpression", resourceCulture);
             }
         }
         
