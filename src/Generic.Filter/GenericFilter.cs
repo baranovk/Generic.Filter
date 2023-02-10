@@ -1,5 +1,6 @@
 ﻿using Generic.Filter.Criteria;
 using Generic.Filter.Expressions;
+using Generic.Filter.Mappings;
 using System.Linq.Expressions;
 using System.Reflection;
 
