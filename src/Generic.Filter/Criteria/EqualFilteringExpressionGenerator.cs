@@ -10,13 +10,10 @@ namespace Generic.Filter.Criteria
             var itemPropertyType = itemPropertyExpression.Member.GetUnderlyingType();
             var filterPropertyType = filterPropertyExpression.Member.GetUnderlyingType();
 
-            var t = Expression.Equal(Expression.Convert(filterPropertyExpression, itemPropertyType!), itemPropertyExpression);
-
             var equalExpr = itemPropertyType == filterPropertyType
                 ? Expression.Equal(itemPropertyExpression, filterPropertyExpression)
                 : Expression.Equal(Expression.Convert(filterPropertyExpression, itemPropertyType!), itemPropertyExpression);
 
-            //var isNullPropertyExpr = Expression.Property(filterPropertyExpression, nameof(EqualCriterion.IsNull));
             var isNullPropertyExpr = Expression.Equal(filterPropertyExpression, Expression.Constant(null));
 
             return Expression.OrElse(isNullPropertyExpr, equalExpr);

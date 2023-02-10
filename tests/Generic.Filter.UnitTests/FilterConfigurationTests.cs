@@ -1,4 +1,5 @@
 ﻿using Generic.Filter.Criteria;
+using Generic.Filter.Mappings;
 using System.Linq.Expressions;
 
 namespace Generic.Filter.UnitTests
@@ -40,19 +41,18 @@ namespace Generic.Filter.UnitTests
         [Test]
         public void FilterWithPropertyMappings_ShouldFilterItemsCorrectlyBySecondLevelProperties()
         {
-            var filter = new ParentFilter(
-                new FilterMappings<Parent, ParentFilter>()
-                    .ForPath(p => p.Child.LastName, f => f.ChildLastName)
-            );
-            
-            filter.ChildLastName = "Turner";
-
             var parents = new List<Parent>
             {
                 new Parent { FirstName = "John", LastName = "Smith", Age = 40, Child = new Person { FirstName = "Tina", LastName = "Burner", Age = 15 } },
                 new Parent { FirstName = "Peter", LastName = "Parker", Age = 35, Child = new Person { FirstName = "Tina", LastName = "Turner", Age = 5 } }
             };
 
+            var filter = new ParentFilter(
+                new FilterMappings<Parent, ParentFilter>()
+                    .ForPath(p => p.Child.LastName, f => f.ChildLastName)
+            );
+            
+            filter.ChildLastName = "Turner";
             var filteredParents = parents.AsQueryable().Where(filter).ToList();
             Assert.That(filteredParents, Has.Count.EqualTo(1));
         }
@@ -101,6 +101,8 @@ namespace Generic.Filter.UnitTests
         public class Parent : Person
         {
             public Person? Child { get; set; }
+
+            public Person? GetChild() => Child;
         }
 
         public class ParentFilter : GenericFilter<Parent, ParentFilter>

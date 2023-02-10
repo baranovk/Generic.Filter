@@ -25,8 +25,6 @@ namespace Generic.Filter.Mappings
         public MemberExpression MapFor(ParameterExpression item)
         {
             Expression expr = item;
-
-            //expr = Expression.MakeMemberAccess(expr, memberExpr.Member);
             return (MemberExpression)_memberExpressions.Aggregate(expr, (acc, prop) => Expression.Property(acc, prop));
         }
 
