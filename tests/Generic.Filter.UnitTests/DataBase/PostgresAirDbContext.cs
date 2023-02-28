@@ -19,7 +19,8 @@ namespace Generic.Filter.UnitTests.DataBase
         {
             options
                 .UseNpgsql(_connectionString)
-                .UseSnakeCaseNamingConvention();
+                .UseSnakeCaseNamingConvention()
+                .LogTo(s => System.Diagnostics.Debug.WriteLine(s));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
