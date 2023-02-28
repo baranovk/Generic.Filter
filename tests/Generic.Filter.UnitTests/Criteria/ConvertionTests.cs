@@ -8,7 +8,7 @@ namespace Generic.Filter.UnitTests.Criteria
         [Test]
         public void EqualCriterion_ShouldSupportConvertionToInt32()
         {
-            Expression<Func<EqualCriterion, string, bool>> ex = (i, s) => i == s;
+            //Expression<Func<EqualCriterion, string?, bool>> ex = (i, s) => i == s;
 
             var criterion = new EqualCriterion(10);
             Assert.That((int)criterion, Is.EqualTo(10));

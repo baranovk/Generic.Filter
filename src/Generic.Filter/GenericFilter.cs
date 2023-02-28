@@ -50,7 +50,7 @@ namespace Generic.Filter
         private IEnumerable<Expression<Func<TItem, bool>>> GetFilteringExpressionsByProperty(GenericFilter<TItem, TFilter> filter)
         {
             var filterType = typeof(TFilter);
-            var itemParameterExpr = Expression.Parameter(typeof(TItem), "item");
+            var itemParameterExpr = Expression.Parameter(typeof(TItem), "p");
 
             return filterType
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -60,14 +60,14 @@ namespace Generic.Filter
                     {
                         if (filterPropertyInfo.GetValue(filter) is null) return expressions;
 
-                        var itemPropertyExpr = null != _propertyMappings?[filterPropertyInfo.Name]
+                        Expression itemValueExpr = null != _propertyMappings?[filterPropertyInfo.Name]
                             ? _propertyMappings[filterPropertyInfo.Name]!.MapFor(itemParameterExpr)
                             : Expression.Property(itemParameterExpr, filterPropertyInfo.Name);
 
                         var filterPropertyExpr = Expression.Property(Expression.Constant(filter), filterPropertyInfo);
 
                         var filteringExpressionGenerator = FilteringExpressionGeneratorFactory.GetFilteringExpressionGenerator(filterPropertyInfo.PropertyType);
-                        var filteringExpression = filteringExpressionGenerator.BuildFilteringExpression(itemPropertyExpr, filterPropertyExpr);
+                        var filteringExpression = filteringExpressionGenerator.BuildFilteringExpression(itemValueExpr, filterPropertyExpr);
 
                         var lambda = Expression.Lambda<Func<TItem, bool>>(filteringExpression, itemParameterExpr);
                         expressions.Add(lambda);

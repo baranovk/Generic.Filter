@@ -21,6 +21,8 @@ namespace Generic.Filter.UnitTests
         [Test]
         public void FilterWithPropertyMappings_ShouldFilterItemsCorrectly()
         {
+            Expression<Func<ParentFilter, Func<Parent, string?>>> expr1 = filter => new Func<Parent, string?>(m => null == m.Child ? null : m.Child.FirstName);
+            
             var filter = new ParentFilter(
                 new FilterMappings<Parent, ParentFilter>()
                     .ForMember(p => p.FirstName, f => f.ParentFirstName)
@@ -34,8 +36,9 @@ namespace Generic.Filter.UnitTests
             var filteredParents = _parents.AsQueryable().Where(filter).ToList();
             Assert.That(filteredParents, Has.Count.EqualTo(1));
 
-            Expression<Func<ParentFilter, Func<Parent, bool>>> ex = filter => new Func<Parent, bool>(m => m.Child.FirstName == filter.ChildFirstName);
-            ex.Compile();
+            //Expression<Func<ParentFilter, Func<Parent, bool>>> expr = filter => new Func<Parent, bool>(m => (null == m.Child ? null : m.Child.FirstName) == filter.ChildFirstName);
+            Expression<Func<ParentFilter, Func<Parent, string?>>> expr = filter => new Func<Parent, string?>(m => null == m.Child ? null : m.Child.FirstName);
+            expr.Compile();
         }
 
         [Test]
@@ -65,9 +68,15 @@ namespace Generic.Filter.UnitTests
                     .ForMember(p => p.Child.LastName, f => f.ChildLastName)
             );
 
+            var parents = new List<Parent>
+            {
+                new Parent { FirstName = "John", LastName = "Smith", Age = 40 },
+                new Parent { FirstName = "Peter", LastName = "Parker", Age = 35, Child = new Person { FirstName = "Tina", LastName = "Parker", Age = 5 } }
+            };
+
             filter.ChildLastName = "Parker";
 
-            var filteredParents = _parents.AsQueryable().Where(filter).ToList();
+            var filteredParents = parents.AsQueryable().Where(filter).ToList();
             Assert.That(filteredParents, Has.Count.EqualTo(1));
         }
 

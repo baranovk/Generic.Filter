@@ -129,6 +129,9 @@
   <data name="ErrorInvalidPropertyPathExpression" xml:space="preserve">
     <value>Expression '{0}' must resolve to object's member path chain.</value>
   </data>
+  <data name="ErrorUnsupportedLambdaExpressionBodyForPathPropertyMapping" xml:space="preserve">
+    <value>Can not use {0} expression of type {1} for path property mapping</value>
+  </data>
   <data name="ErrorUnsupportedMemberInfoType" xml:space="preserve">
     <value>Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo</value>
   </data>

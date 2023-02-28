@@ -97,6 +97,15 @@ namespace Generic.Filter {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not use {0} expression of type {1} for path property mapping.
+        /// </summary>
+        internal static string ErrorUnsupportedLambdaExpressionBodyForPathPropertyMapping {
+            get {
+                return ResourceManager.GetString("ErrorUnsupportedLambdaExpressionBodyForPathPropertyMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo.
         /// </summary>
         internal static string ErrorUnsupportedMemberInfoType {

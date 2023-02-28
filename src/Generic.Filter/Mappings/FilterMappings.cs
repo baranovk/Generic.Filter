@@ -19,7 +19,7 @@ namespace Generic.Filter.Mappings
                     string.Format(Resources.ErrorUnsupportedMemberTypeForMapping, filterMemberExpr),
                 nameof(filterMemberExpr));
 
-            _mappings.Add(filterMemberInfo.Name, new PathPropertyMapping(itemMemberExpr));
+            _mappings.Add(filterMemberInfo.Name, new PathPropertyMapping<TItem, TItemMember>(itemMemberExpr));
             return this;
         }
 
@@ -28,7 +28,7 @@ namespace Generic.Filter.Mappings
             Expression<Func<TFilter, TFilterMember>> filterMemberExpr)
         {
             var filterMemberInfo = ReflectionHelper.FindProperty(filterMemberExpr);
-            _mappings.Add(filterMemberInfo.Name, new PathPropertyMapping(itemMemberExpr));
+            _mappings.Add(filterMemberInfo.Name, new PathPropertyMapping<TItem, TItemMember>(itemMemberExpr));
             return this;
         }
 

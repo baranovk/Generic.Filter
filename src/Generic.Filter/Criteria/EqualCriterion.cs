@@ -68,6 +68,26 @@ namespace Generic.Filter.Criteria
             return int.TryParse((string?)value, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out var int32) ? int32 : default;
         }
 
+        public static bool operator ==(string? x, EqualCriterion y)
+        {
+            return x == (string?)y;
+        }
+
+        public static bool operator ==(int x, EqualCriterion y)
+        {
+            return x == (int)y;
+        }
+
+        public static bool operator !=(string? x, EqualCriterion y)
+        {
+            return x != (string?)y;
+        }
+
+        public static bool operator !=(int x, EqualCriterion y)
+        {
+            return x == (int)y;
+        }
+
         #endregion
     }
 }

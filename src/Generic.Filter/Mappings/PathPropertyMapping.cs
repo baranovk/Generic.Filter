@@ -1,10 +1,11 @@
 ﻿using Generic.Filter.Extensions;
+using System.Diagnostics.Metrics;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Generic.Filter.Mappings
 {
-    public class PathPropertyMapping : IFilterPropertyMapping
+    public class PathPropertyMapping<TItem, TItemMember> : IFilterPropertyMapping
     {
         /*
             p => p.Child.Property
@@ -14,25 +15,48 @@ namespace Generic.Filter.Mappings
 			            |-- Expression[MemberExpression]: NodeType = MemberAccess, Member[MemberInfo] = Child
 				            |-- Expression[TypedParameterExpression]: NodeType = Parameter, Member[MemberInfo] = Child
         */
-
-        private readonly Stack<PropertyInfo> _memberExpressions = new();
+        private string? _parameterName;
+        private readonly Stack<MemberExpression> _memberExpressions = new();
 
         public PathPropertyMapping(LambdaExpression itemMemberExpr)
         {
             Parse(itemMemberExpr);
         }
 
-        public MemberExpression MapFor(ParameterExpression item)
+        public Expression MapFor(ParameterExpression itemParameterExpr)
         {
-            Expression expr = item;
-            return (MemberExpression)_memberExpressions.Aggregate(expr, (acc, prop) => Expression.Property(acc, prop));
+            /*
+             * p.Child.Property
+             * 
+             * return null == p.Child ? null : p.Child
+             * 
+             */
+            Expression expr = itemParameterExpr;
+            //return (MemberExpression)_memberExpressions.Aggregate(expr, (acc, prop) => Expression.Property(acc, prop));
+
+            foreach (var memberExpr in _memberExpressions)
+            {
+                expr = memberExpr.Member.GetUnderlyingType().IsClass
+                    ? Expression.Condition(Expression.ReferenceEqual(memberExpr, Expression.Constant(null)), 
+                        Expression.Constant(null, memberExpr.Member.GetUnderlyingType()), 
+                            Expression.Property(expr, (PropertyInfo)memberExpr.Member))
+                    : Expression.Property(expr, (PropertyInfo)memberExpr.Member);
+            }
+
+            //return Expression.Invoke(Expression.Constant(Expression.Lambda<Func<TItem, TItemMember>>(expr, Expression.Parameter(typeof(TItem), _parameterName))), Expression.Parameter(typeof(TItem), _parameterName));
+            return Expression.Invoke(Expression.Lambda<Func<TItem, TItemMember>>(expr, Expression.Parameter(typeof(TItem), _parameterName)), Expression.Parameter(typeof(TItem), _parameterName));
         }
 
         private void Parse(LambdaExpression itemMemberExpr)
         {
-            // TODO: check if itemMemberExpr.Body is MemberExpression
-            //MemberExpression expressionToCheck = ((itemMemberExpr.Body as MemberExpression)!.Expression as MemberExpression)!;
-            Expression? expressionToCheck = (itemMemberExpr.Body as MemberExpression)!;
+            Expression? expressionToCheck = (itemMemberExpr.Body as MemberExpression);
+
+            if(expressionToCheck is null)
+                throw new ArgumentException(
+                    string.Format(Resources.ErrorUnsupportedLambdaExpressionBodyForPathPropertyMapping, 
+                        itemMemberExpr.Body, itemMemberExpr.Body.NodeType),
+                    nameof(itemMemberExpr)
+                );
 
             while (true)
             {
@@ -41,16 +65,20 @@ namespace Generic.Filter.Mappings
                     case MemberExpression { Member: var member, NodeType: ExpressionType.MemberAccess }:
                         if (!member.IsProperty())
                             throw GenericFilterException.Build(Resources.ErrorInvalidMemberType,
-                                member.Name, MemberTypes.Property, member.MemberType);
-                        _memberExpressions.Push((PropertyInfo)member);
+                                member.Name, MemberTypes.Property, member.MemberType
+                            );
+                        //_memberExpressions.Push((PropertyInfo)member);
+                        _memberExpressions.Push((expressionToCheck as MemberExpression)!);
                         expressionToCheck = (expressionToCheck as MemberExpression)!.Expression;
                         break;
-                    case Expression { NodeType: ExpressionType.Parameter }:
+                    case ParameterExpression { NodeType: ExpressionType.Parameter, Name : var name }:
+                        _parameterName = name;
                         return;
                     default:
                         throw new ArgumentException(
                             string.Format(Resources.ErrorInvalidPropertyPathExpression, itemMemberExpr),
-                                nameof(itemMemberExpr));
+                            nameof(itemMemberExpr)
+                        );
                 }
             }
         }

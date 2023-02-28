@@ -4,9 +4,9 @@ namespace Generic.Filter.Extensions
 {
     public static class ReflectionExtensions
     {
-        public static Type? GetUnderlyingType(this MemberInfo member) => member.MemberType switch
+        public static Type GetUnderlyingType(this MemberInfo member) => member.MemberType switch
         {
-            MemberTypes.Event => ((EventInfo)member).EventHandlerType,
+            MemberTypes.Event => (((EventInfo)member).EventHandlerType)!,
             MemberTypes.Field => ((FieldInfo)member).FieldType,
             MemberTypes.Method => ((MethodInfo)member).ReturnType,
             MemberTypes.Property => ((PropertyInfo)member).PropertyType,
@@ -14,5 +14,7 @@ namespace Generic.Filter.Extensions
         };
 
         public static bool IsProperty(this MemberInfo member) => member.MemberType.Equals(MemberTypes.Property);
+
+        public static bool IsNullable(this Type type) => Nullable.GetUnderlyingType(type) != null;
     }
 }

@@ -48,6 +48,7 @@ namespace Generic.Filter.UnitTests.DataBase
         [Explicit]
         public void GenericFilter_ShouldFilterFlightsByNumberAndAircraftCode()
         {
+            var t = _dbContext.Flight.Include(f => f.Aircraft).Where(f => null != f.Aircraft ? f.Aircraft.Code == "AAA" : true).ToList();
             var filter = new AirportFilter { AirportCode = "HND" };
             var filteredAirports = _dbContext.Flight.Include(f => f.Aircraft).Take(2).ToList();
 
